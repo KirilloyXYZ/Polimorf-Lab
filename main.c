@@ -7,15 +7,16 @@
 
 int main()
 {
-    Vector a, b; 
+    Vector* a = vectorCreate();
+    Vector* b = vectorCreate();
 
-    a.data = NULL; 
-    a.size = 0;
-    a.type = NULL;
-
-    b.data = NULL;
-    b.size = 0;
-    b.type = NULL;
+    if(!a || !b)
+{
+    printf("Memory error.\n");
+    vectorDestroy(a);
+    vectorDestroy(b);
+    return 1;
+}
 
     while (1)
 
@@ -40,8 +41,8 @@ int main()
         switch (choice)
         {
             case 0:
-                vectorFree(&a);
-                vectorFree(&b);
+                vectorDestroy(a);
+                vectorDestroy(b);
                 return 0;
 
             case 1:
@@ -54,20 +55,20 @@ int main()
                     break;
                 }
 
-                vectorFree(&a);
+                vectorFree(a);
 
-                if ((t == 1 && vectorInit(&a, getRealAlgebra(), 0) != 0) || (t == 2 && vectorInit(&a, getComplexAlgebra(), 0) != 0))
+                if ((t == 1 && vectorInit(a, getRealAlgebra(), 0) != 0) || (t == 2 && vectorInit(a, getComplexAlgebra(), 0) != 0))
                 {
                     printf("Memory error.\n");
-                    vectorFree(&a);
+                    vectorFree(a);
                     break;
                 }
                 
                 
-                if (vectorRead(&a) != 0) 
+                if (vectorRead(a) != 0) 
                 {
                     printf("Failed to read a.\n");
-                    vectorFree(&a);
+                    vectorFree(a);
                 }
                 break;
             }
@@ -82,54 +83,50 @@ int main()
                     break;
                 }
 
-                vectorFree(&b);
+                vectorFree(b);
 
-                if ((t == 1 && vectorInit(&b, getRealAlgebra(), 0) != 0) || (t == 2 && vectorInit(&b, getComplexAlgebra(), 0) != 0))
+                if ((t == 1 && vectorInit(b, getRealAlgebra(), 0) != 0) || (t == 2 && vectorInit(b, getComplexAlgebra(), 0) != 0))
                 {
                     printf("Memory error.\n");
-                    vectorFree(&b);
+                    vectorFree(b);
                     break;
                 }
 
-                if (vectorRead(&b) != 0) 
+                if (vectorRead(b) != 0) 
                 {
                     printf("Failed to read B.\n");
-                    vectorFree(&b);
+                    vectorFree(b);
                 }
                 break;
             }
 
             case 3:
-                if (!a.type) printf("a is not created yet.\n");
+                if (!vectorIsInitialized(a)) printf("a is not created yet.\n");
                 else 
                 { 
-                    printf("a = "); vectorPrint(&a);
+                    printf("a = "); vectorPrint(a);
                 }
                 break;
 
             case 4:
-                if(!b.type) printf("b is not created yet.\n");
+                if(!vectorIsInitialized(b)) printf("b is not created yet.\n");
                 else 
                 { 
-                    printf("b = "); vectorPrint(&b);
+                    printf("b = "); vectorPrint(b);
                 }
                 break;
 
             case 5:
             {
-                if (!a.type || !b.type) 
+                if (!vectorIsInitialized(a) || !vectorIsInitialized(b)) 
                 {
                     printf("Create a and b first.\n");
                     break;
                 }
 
-                Vector c;
+                Vector* c = vectorCreate();
 
-                c.data = NULL;
-                c.size = 0;
-                c.type = NULL;
-
-                if(vectorAdd(&a, &b, &c) != 0)
+                if(vectorAdd(a, b, c) != 0)
                 {
                     printf("Amount error\n");
                 }
@@ -137,30 +134,30 @@ int main()
                 else
                 {
                     printf("a + b = ");
-                    vectorPrint(&c);
+                    vectorPrint(c);
                 }
 
-                vectorFree(&c);
+                vectorDestroy(c);
                 break;
 
             }
 
             case 6:
             {
-                if (!a.type || !b.type) 
+                if (!vectorIsInitialized(a) || !vectorIsInitialized(a)) 
                 {
                     printf("Create a and b first.\n");
                     break;
                 }
 
-                void* res = malloc(a.type->elementSize);
+                void* res = malloc(vectorElementSize(a));
                 if (!res)
                 {
                     printf("Memory error.\n");
                     break;
                 }
 
-                if (vectorDot(&a, &b, res) != 0)
+                if (vectorDot(a, b, res) != 0)
                 {
                     printf("Different dimensions\n");
                     free(res);
@@ -170,7 +167,7 @@ int main()
                 else
                 {
                     printf("a * b = ");
-                    a.type->print(res);      
+                    vectorPrintValue(a, res);      
                     printf("\n");
                 }
 

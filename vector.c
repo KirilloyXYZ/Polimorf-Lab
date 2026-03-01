@@ -1,7 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "vector.h"
+
+struct Vector 
+{
+    void* data;              
+    size_t size;             
+    const Algebra* type;     
+};
 
 int vectorInit(Vector* v, const Algebra* type, size_t n)
 {
@@ -136,7 +144,73 @@ int vectorRead(Vector* v)
         }
 
     }
-
+    
     return 0;
-         
+
 }
+
+Vector* vectorCreate(void)
+{
+    Vector* v = (Vector*)malloc(sizeof(*v));
+    if (!v) return NULL;
+    v->data = NULL;
+    v->size = 0;
+    v->type = NULL;
+    return v;
+}
+
+void vectorDestroy(Vector* v)
+{
+    if (!v) return;
+    vectorFree(v);
+    free(v);
+}
+
+int vectorIsInitialized(const Vector* v)
+{
+    return (v && v->type) ? 1 : 0;
+}
+
+size_t vectorSize(const Vector* v)
+{
+    return v ? v->size : 0;
+}
+
+size_t vectorElementSize(const Vector* v)
+{
+    return (v && v->type) ? v->type->elementSize : 0;
+}
+
+int vectorSet(Vector* v, size_t i, const void* value)
+{
+    if (!v || !v->type || !v->data || !value) return 1;
+    if (i >= v->size) return 1;
+
+    void* dst = (char*)v->data + i * v->type->elementSize;
+    memcpy(dst, value, v->type->elementSize);
+    return 0;
+}
+
+int vectorGet(const Vector* v, size_t i, void* out_value)
+{
+    if (!v || !v->type || !v->data || !out_value) return 1;
+    if (i >= v->size) return 1;
+
+    const void* src = (const char*)v->data + i * v->type->elementSize;
+    memcpy(out_value, src, v->type->elementSize);
+    return 0;
+}
+
+void vectorPrintValue(const Vector* v, const void* value)
+{
+    if (!v || !v->type || !v->type->print || !value)
+    {
+        printf("Undefined value");
+        return;
+    }
+    v->type->print(value);
+}
+
+
+    
+         

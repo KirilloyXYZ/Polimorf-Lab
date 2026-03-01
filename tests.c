@@ -42,72 +42,88 @@ int main(void) {
 
     {
         const Algebra* R = getRealAlgebra();
-        Vector a = {0}, b = {0}, out = {0};
+        Vector* a = vectorCreate();
+        Vector* b = vectorCreate();
+        Vector* out = vectorCreate();
 
-        assert(vectorInit(&a, R, 2) == 0);
-        assert(vectorInit(&b, R, 2) == 0);
-        assert(vectorInit(&out, R, 0) == 0); 
+        assert(a && b && out);
 
-        ((Real*)a.data)[0].value = 1.0;
-        ((Real*)a.data)[1].value = 2.0;
+        assert(vectorInit(a, R, 2) == 0);
+        assert(vectorInit(b, R, 2) == 0);
+        assert(vectorInit(out, R, 0) == 0);
 
-        ((Real*)b.data)[0].value = 10.0;
-        ((Real*)b.data)[1].value = 20.0;
+        Real t;
 
-        assert(vectorAdd(&a, &b, &out) == 0);
-        assert(out.size == 2);
-        assert(((Real*)out.data)[0].value == 11.0);
-        assert(((Real*)out.data)[1].value == 22.0);
+        t.value = 1.0;  assert(vectorSet(a, 0, &t) == 0);
+        t.value = 2.0;  assert(vectorSet(a, 1, &t) == 0);
 
-        assert(vectorAdd(NULL, &b, &out) == 1);
-        assert(vectorAdd(&a, NULL, &out) == 1);
-        assert(vectorAdd(&a, &b, NULL) == 1);
+        t.value = 10.0; assert(vectorSet(b, 0, &t) == 0);
+        t.value = 20.0; assert(vectorSet(b, 1, &t) == 0);
 
-        Vector c = {0};
-        assert(vectorInit(&c, getComplexAlgebra(), 2) == 0);
-        assert(vectorAdd(&a, &c, &out) == 1);
+        assert(vectorAdd(a, b, out) == 0);
+        assert(vectorSize(out) == 2);
 
-        assert(vectorInit(&b, R, 3) == 0);
-        assert(vectorAdd(&a, &b, &out) == 1);
+        Real r;
+        assert(vectorGet(out, 0, &r) == 0); 
+        assert(r.value == 11.0);
+        
+        assert(vectorGet(out, 1, &r) == 0); 
+        assert(r.value == 22.0);
 
-        vectorFree(&a);
-        vectorFree(&b);
-        vectorFree(&c);
-        vectorFree(&out);
+        assert(vectorAdd(NULL, b, out) == 1);
+        assert(vectorAdd(a, NULL, out) == 1);
+        assert(vectorAdd(a, b, NULL) == 1);
+
+        Vector* c = vectorCreate();
+        assert(c);
+        assert(vectorInit(c, getComplexAlgebra(), 2) == 0);
+        assert(vectorAdd(a, c, out) == 1);
+
+        assert(vectorInit(b, R, 3) == 0);
+        assert(vectorAdd(a, b, out) == 1);
+
+        vectorDestroy(a);
+        vectorDestroy(b);
+        vectorDestroy(c);
+        vectorDestroy(out);
     }
 
     {
         const Algebra* R = getRealAlgebra();
-        Vector a = {0}, b = {0};
+        Vector* a = vectorCreate();
+        Vector* b = vectorCreate();
+        assert(a && b);
+
         Real res;
+        assert(vectorInit(a, R, 2) == 0);
+        assert(vectorInit(b, R, 2) == 0);
 
-        assert(vectorInit(&a, R, 2) == 0);
-        assert(vectorInit(&b, R, 2) == 0);
+        Real t;
+        t.value = 1.0; assert(vectorSet(a, 0, &t) == 0);
+        t.value = 2.0; assert(vectorSet(a, 1, &t) == 0);
 
-        ((Real*)a.data)[0].value = 1.0;
-        ((Real*)a.data)[1].value = 2.0;
+        t.value = 3.0; assert(vectorSet(b, 0, &t) == 0);
+        t.value = 4.0; assert(vectorSet(b, 1, &t) == 0);
 
-        ((Real*)b.data)[0].value = 3.0;
-        ((Real*)b.data)[1].value = 4.0;
+        assert(vectorDot(a, b, &res) == 0);
+        assert(res.value == 11.0);
 
-        assert(vectorDot(&a, &b, &res) == 0);
-        assert(res.value == 11.0); 
+        assert(vectorDot(NULL, b, &res) == 1);
+        assert(vectorDot(a, NULL, &res) == 1);
+        assert(vectorDot(a, b, NULL) == 1);
 
-        assert(vectorDot(NULL, &b, &res) == 1);
-        assert(vectorDot(&a, NULL, &res) == 1);
-        assert(vectorDot(&a, &b, NULL) == 1);
-
-        Vector c = {0};
-        assert(vectorInit(&c, getComplexAlgebra(), 2) == 0);
+        Vector* c = vectorCreate();
+        assert(c);
+        assert(vectorInit(c, getComplexAlgebra(), 2) == 0);
         Complex outC;
-        assert(vectorDot(&a, &c, &outC) == 1);
+        assert(vectorDot(a, c, &outC) == 1);
 
-        assert(vectorInit(&b, R, 3) == 0);
-        assert(vectorDot(&a, &b, &res) == 1);
+        assert(vectorInit(b, R, 3) == 0);
+        assert(vectorDot(a, b, &res) == 1);
 
-        vectorFree(&a);
-        vectorFree(&b);
-        vectorFree(&c);
+        vectorDestroy(a);
+        vectorDestroy(b);
+        vectorDestroy(c);
     }
 
     
